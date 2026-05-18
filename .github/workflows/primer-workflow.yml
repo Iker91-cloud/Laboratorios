@@ -15,4 +15,4 @@ jobs:
 
       # Step 2: Listar contenido del repo (sin usar actions externas)
       - name: Listar el contenido del espacio de trabajo
-        run: ls -la
+        run: ls 
