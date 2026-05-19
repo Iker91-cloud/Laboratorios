@@ -1,0 +1,62 @@
+name: Reusable Node.js Pipeline
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        required: true
+        type: string
+        description: "Versión de Node.js a utilizar (ej. 18.x)"
+      artifact-name:
+        required: false
+        type: string
+        default: "app-build"
+        description: "Prefijo del nombre del artefacto"
+    outputs:
+      test-outcome:
+        description: "Resultado del paso de testing"
+        value: ${{ jobs.build-test.outputs.test-status }}
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    outputs:
+      test-status: ${{ steps.run-tests.outcome }}
+    steps:
+      - name: 1. Checkout del código
+        uses: actions/checkout@v4.1.1
+
+      - name: 2. Configurar Node.js ${{ inputs.node-version }}
+        uses: actions/setup-node@v4.0.2
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      # Se crea una clave única por OS, versión de Node y hash del package-lock.json para evitar colisiones
+      - name: 3. Configurar Cache de dependencias
+        uses: actions/cache@v4.0.0
+        id: npm-cache
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ inputs.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ inputs.node-version }}-
+
+      - name: 4. Instalar dependencias
+        run: npm ci
+
+      - name: 5. Ejecutar Tests y generar reporte
+        id: run-tests
+        continue-on-error: true # Permite que el pipeline continúe para subir los logs aunque falle un test
+        run: npm test > test-report.log 2>&1
+
+      - name: 6. Compilar proyecto
+        run: npm run build --if-present
+
+      - name: 7. Subir Artifacts
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: ${{ inputs.artifact-name }}-node-${{ inputs.node-version }}
+          path: |
+            dist/
+            test-report.log
+          retention-days: 5 # Retención personalizada
