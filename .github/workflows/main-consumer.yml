@@ -34,4 +34,4 @@ jobs:
           
       - name: Lógica adicional (Simulación de despliegue)
         if: ${{ needs.build-node-20.outputs.test-outcome == 'success' }}
-        run: echo "Los tests en la versión principal (20.x) pasaron. Procediendo con el despliegue..."
+        run: echo "Los tests pasaron o se omitieron correctamente. Despliegue simulado..."
