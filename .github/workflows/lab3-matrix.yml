@@ -1,0 +1,67 @@
+name: Lab 3 - Matrix Build Enterprise
+
+on: [push]
+
+# Parte 4: Concurrency [cite: 33]
+# Evita ejecuciones redundantes cancelando las que estén en progreso en la misma rama[cite: 34, 35, 36].
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-enterprise:
+    # El SO será dinámico basado en la matriz [cite: 15, 16]
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      # Exigencia implícita de usar fail-fast (lo ponemos en false para que no cancele otras pruebas si una falla) [cite: 9]
+      fail-fast: false
+      
+      # Parte 1: Matrix básica [cite: 20]
+      matrix:
+        [cite_start]os: [ubuntu-latest, windows-latest] # Sistemas operativos [cite: 22]
+        [cite_start]node-version: [18, 20]              # Versiones runtime de Node [cite: 17, 23]
+        [cite_start]mode: [debug, release]              # Modo de ejecución [cite: 24]
+        
+        # Parte 2: Exclusiones [cite: 25]
+        exclude:
+          # Excluimos la combinación Windows + Node 18 + Debug por ser "incompatible" 
+          - os: windows-latest
+            node-version: 18
+            mode: debug
+            
+        # Parte 3: Includes [cite: 29]
+        include:
+          # Añadimos configuración especial para producción a una combinación específica 
+          - os: ubuntu-latest
+            node-version: 20
+            mode: release
+            environment: production
+            extra_var: "prod-secret-key"
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Ejecutar build simulado
+        # Usamos bash explícitamente para que los comandos funcionen igual en Ubuntu y Windows
+        shell: bash
+        run: |
+          echo "Iniciando build en SO: ${{ matrix.os }}"
+          echo "Modo: ${{ matrix.mode }}"
+          echo "Entorno: ${{ matrix.environment || 'development' }}"
+
+      # Parte 5: Job summary generado dinámicamente [cite: 37, 46]
+      - name: Generar Job Summary
+        shell: bash
+        run: |
+          echo "### 🚀 Resumen de Ejecución para ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Configuración ejecutada:** SO=${{ matrix.os }}, Node=${{ matrix.node-version }}, Modo=${{ matrix.mode }} [cite: 38, 39]" >> $GITHUB_STEP_SUMMARY
+          echo "- **Resultado:** Éxito [cite: 40]" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tiempo estimado:** ~1 minuto [cite: 41]" >> $GITHUB_STEP_SUMMARY
+          echo "- **Información extra de matrix:** Entorno=${{ matrix.environment || 'N/A' }}, Var Adicional=${{ matrix.extra_var || 'N/A' }} [cite: 42]" >> $GITHUB_STEP_SUMMARY
