@@ -1,0 +1,67 @@
+name: Lab 4 - Pipeline Seguro
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+# Parte 2: Reducir permisos a nivel workflow (Principio de Mínimo Privilegio)
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: 🏗️ Construir y Validar
+    runs-on: ubuntu-latest
+    steps:
+      # Restricción: No usar @main en actions externas (usamos el tag específico @v4)
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Validar Tests
+        run: |
+          echo "Ejecutando batería de tests..."
+          echo "Todos los tests en verde ✅"
+
+  deploy-staging:
+    name: 🚀 Despliegue Staging
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    # Parte 3: Asignar al entorno de staging
+    environment: staging
+    steps:
+      - name: Desplegar en Staging
+        # Parte 1: Demostrar diferencia entre vars y secrets
+        run: |
+          echo "Desplegando la aplicación: ${{ vars.APP_NAME }}"
+          echo "El entorno de staging está listo."
+
+  deploy-production:
+    name: 🔒 Despliegue Producción
+    # Parte 4: Solo si tests correctos (depende de deploy-staging que depende de tests)
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    # Parte 3: Asignar al entorno protegido de producción (pedirá aprobación)
+    environment: production
+    # Parte 4: Permitir despliegue SOLO desde la rama main
+    if: github.ref == 'refs/heads/main'
+    
+    # Parte 2: Reducir permisos a nivel job
+    permissions:
+      contents: read
+      
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Desplegar en Producción
+        # Parte 1 y Restricciones: Scope correcto y NO imprimir secretos
+        run: |
+          echo "Iniciando despliegue crítico de ${{ vars.APP_NAME }}..."
+          echo "Autenticando con DEPLOY_SECRET..."
+          # Simulamos el uso del secreto pasando la variable al entorno, pero NUNCA hacemos echo del secreto.
+          echo "Despliegue completado con éxito 🚀"
+        env:
+          API_TOKEN: ${{ secrets.API_SECRET }}
+          DEPLOY_KEY: ${{ secrets.DEPLOY_SECRET }}
