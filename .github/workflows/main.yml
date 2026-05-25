@@ -1,0 +1,19 @@
+name: Pipeline Hibrido Windows
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  job-en-hosted:
+    runs-on: windows-latest
+    steps:
+      - name: Ejecucion en GitHub
+        run: Write-Host "Este job corre en los servidores de GitHub"
+
+  job-en-self-hosted:
+    runs-on: [self-hosted, mi-runner-local]
+    needs: job-en-hosted
+    steps:
+      - name: Ejecucion local
+        run: Write-Host "Este job corre en mi propia maquina Windows"
