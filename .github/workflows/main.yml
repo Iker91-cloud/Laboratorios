@@ -12,7 +12,7 @@ jobs:
         run: Write-Host "Este job corre en los servidores de GitHub"
 
   job-en-self-hosted:
-    runs-on: [self-hosted, mi-runner-local]
+    runs-on: [self-hosted, W11VCE ]
     needs: job-en-hosted
     steps:
       - name: Ejecucion local
