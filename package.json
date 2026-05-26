@@ -3,5 +3,22 @@
   "version": "1.0.0",
   "scripts": {
     "test": "echo \"Tests simulados pasados\""
+  },
+  "description": "",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Iker91-cloud/Laboratorios.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Iker91-cloud/Laboratorios/issues"
+  },
+  "homepage": "https://github.com/Iker91-cloud/Laboratorios#readme",
+  "dependencies": {
+    "@actions/core": "^3.0.1"
   }
 }

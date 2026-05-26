@@ -1,0 +1,15 @@
+name: 'Normalizador de Tags'
+description: 'Limpia una cadena de texto para usarla como tag de versionado'
+branding:
+  icon: 'tag'
+  color: 'blue'
+inputs:
+  raw-string:
+    description: 'El texto en bruto que se necesita normalizar'
+    required: true
+outputs:
+  normalized-tag:
+    description: 'El texto limpio y formateado'
+runs:
+  using: 'node20'
+  main: 'index.js'
